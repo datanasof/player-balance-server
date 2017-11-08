@@ -77,8 +77,7 @@ public class Connector {
 	}
 	
 	public List<Object> selectPlayerInfo(int id) {
-	    Connection cn = getConnected(urlDB);
-	    
+	    Connection cn = getConnected(urlDB);	    
 	    try {
 	        Statement stmt;
 	        try {
@@ -88,13 +87,17 @@ public class Connector {
 	            if(rs.next()){         
 	            	float balanceLimit = rs.getFloat("balancelimit");
 	            	boolean blacklisted = rs.getBoolean("blacklisted");
-	            	System.out.println(balanceLimit+";"+blacklisted);
+	            	
 	            	rs.close(); 
+	            	
 	            	if(balanceLimit != 0.0){
 	            		playerInfo.add(balanceLimit);
 	            	}
-	            	else{playerInfo.add(SQLstatement.defaultBalanceLimit);	            		
+	            	
+	            	else{
+	            		playerInfo.add(SQLstatement.defaultBalanceLimit);	            		
 	            	}
+	            	
 	            	playerInfo.add(blacklisted);
 	            	return playerInfo;
 	            }
@@ -104,8 +107,6 @@ public class Connector {
 	            	playerInfo.add(false);
 	            	return playerInfo;
 	            }
-	                     
-	            
 	            
 	        } catch (Exception e) {
 	            System.out.println(e.getMessage());
@@ -123,7 +124,10 @@ public class Connector {
 		conn.createTable(SQLstatement.createPlayers);
 		conn.createTable(SQLstatement.createPlayerInfo);
 		conn.selectPlayer("user3");
-		conn.selectPlayerInfo(2);
+		List<Object> plinfo = new ArrayList<Object>();
+		plinfo = conn.selectPlayerInfo(2);
+		System.out.println(plinfo.get(0));
+		System.out.println(plinfo.get(1));
 	}
 }
 /**
