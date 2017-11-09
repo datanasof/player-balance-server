@@ -26,8 +26,16 @@ public class SQLstatement {
 	public static String selectPlayerInfo = "SELECT balancelimit, blacklisted "
 			+ "FROM player_info "
 			+ "WHERE id=";
-	
-	
+		
+	public static String updatePlayers = "UPDATE players "
+			+ "SET balance_version = ?, "
+			+ "balance = ? "
+			+ "WHERE players.id = ?";
+			
+	public static String updatePlayerInfo = "UPDATE player_info "
+			+ "SET balancelimit = ?, "
+			+ "blacklisted = ? "
+			+ "WHERE player_info.id = ?";
 	
 
 }

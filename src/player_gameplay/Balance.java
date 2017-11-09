@@ -15,6 +15,14 @@ public class Balance {
 		this.blacklisted = false;
 	}
 	
+	public Balance(int version, float walletBalance, float limit, boolean blacklisted) {
+		super();
+		this.version = version;
+		this.walletBalance = walletBalance;
+		this.limit = limit;
+		this.blacklisted = blacklisted;
+	}
+	
 	public Balance(){		
 	}
 	
