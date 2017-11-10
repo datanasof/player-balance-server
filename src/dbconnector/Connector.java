@@ -27,9 +27,8 @@ public class Connector {
 		}		
 	}
 	
-	public void createTable(String sqlSt) throws ClassNotFoundException {
+	public void createTable(String sqlSt) throws ClassNotFoundException{
 	    Connection cn = getConnected(urlDB);   
-
 	    try {
 	        PreparedStatement prepSt;
 	        try {
@@ -38,12 +37,13 @@ public class Connector {
 	            prepSt.close();
 	        } catch (Exception e) {
 	            System.out.println(e.getMessage());
-	        }	        
+	            
+	        }	
 	        cn.close();
-	        
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
+	    
 	}
 	
 	public Player selectPlayer (String username) throws ClassNotFoundException {
@@ -65,9 +65,10 @@ public class Connector {
 	        		
 	            	Balance myBalance = new Balance(balanceVersion, balance, balanceLimit, blacklisted);
 	        		Player player = new Player(username, myBalance);
+	        		cn.close();
+	        		rs.close();
 	        		return player;
-	            }
-	            rs.close();
+	            }            
 	            
 	        } catch (Exception e) {
 	            System.out.println(e.getMessage());
@@ -81,8 +82,7 @@ public class Connector {
 	}
 	
 	private int getPlayerID (String username) throws ClassNotFoundException {
-	    Connection cn = getConnected(urlDB);
-	    
+	    Connection cn = getConnected(urlDB);	    
 	    try {
 	        Statement stmt;
 	        try {
@@ -90,15 +90,16 @@ public class Connector {
 	            ResultSet rs = stmt.executeQuery(SQLstatement.selectPlayer + String.format("\"%s\"",username));	            
 	            	            
 	            if(rs.next()){
-	            	int id = rs.getInt("id");	  
+	            	int id = rs.getInt("id");
+	            	rs.close();
+	            	cn.close();
 	        		return id;
 	            }
 	            rs.close();
-	            
+            	cn.close();	            
 	        } catch (Exception e) {
 	            System.out.println(e.getMessage());
-	        }	        
-	        cn.close();	        
+	        }	        	               
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
@@ -115,32 +116,31 @@ public class Connector {
             List<Object> playerInfo = new ArrayList<Object>();	            
             if(rs.next()){         
             	float balanceLimit = rs.getFloat("balancelimit");
-            	boolean blacklisted = rs.getBoolean("blacklisted");
-            	
+            	boolean blacklisted = rs.getBoolean("blacklisted");            	
             	rs.close(); 
             	
             	if(balanceLimit != 0.0){
             		playerInfo.add(balanceLimit);
-            	}
-            	
+            	} 
             	else{
             		playerInfo.add(SQLstatement.defaultBalanceLimit);	            		
             	}
             	
             	playerInfo.add(blacklisted);
+            	cn.close();
             	return playerInfo;
             }
             
             else{
             	playerInfo.add(SQLstatement.defaultBalanceLimit);
             	playerInfo.add(false);
+            	cn.close();
             	return playerInfo;
             }
             
         } catch (Exception e) {
             System.out.println(e.getMessage());
-        }	        
-        cn.close(); 
+        }
 	    return null;	    
 	}
 	
@@ -153,7 +153,7 @@ public class Connector {
             prepst.setFloat(2, balance);
             prepst.setInt(3, id);            
             prepst.executeUpdate();
-        	   
+            cn.close();   
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -168,7 +168,7 @@ public class Connector {
             prepst.setBoolean(2, blacklisted);
             prepst.setInt(3, id); 
             prepst.executeUpdate();
-        	   
+            cn.close();   
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -186,8 +186,7 @@ public class Connector {
 		//conn.createTable(SQLstatement.createPlayerInfo);
 		Player gosho = conn.selectPlayer("user3");
 		System.out.println(gosho.getUsername()+gosho.getBalance()+gosho.getBalanceVersion());
-		conn.updatePlayer("user3", 5, 999, 888, true);
-		System.out.println("hi");
+		conn.updatePlayer("user3", 6, 1999, 888, true);		
 		Player pesho = conn.selectPlayer("user3");
 		System.out.println(pesho.getUsername()+pesho.getBalance()+pesho.getBalanceVersion());
 		
