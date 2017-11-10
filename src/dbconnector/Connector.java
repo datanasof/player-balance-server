@@ -6,10 +6,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import player_gameplay.Balance;
 import player_gameplay.Player;
+import player_gameplay.Transaction;
 
 public class Connector {
 	
@@ -108,8 +111,7 @@ public class Connector {
 	
 	private List<Object> selectPlayerInfo(int id) throws ClassNotFoundException, SQLException {
 	    Connection cn = getConnected(urlDB);	    
-	    
-        Statement stmt;
+	    Statement stmt;
         try {
             stmt = cn.createStatement();	            
             ResultSet rs = stmt.executeQuery(SQLstatement.selectPlayerInfo + id);	            
@@ -180,15 +182,47 @@ public class Connector {
 		updatePlayerInfo(id, balanceLimit, blacklisted);
     }
 	
+	
+	
+	public HashMap<Integer, Transaction> selectTransactions() {
+        try {
+        	Connection cn = getConnected(urlDB);		
+    	    Statement stmt;
+            stmt = cn.createStatement();	  
+            HashMap<Integer, Transaction> transactions = new HashMap<Integer, Transaction>();  
+            ResultSet rs = stmt.executeQuery(SQLstatement.selectTransactions);	            
+                        
+            while(rs.next()){   
+            	int transactionID = rs.getInt("transactionid");
+            	int errorCode = rs.getInt("errorcode");
+            	int balanceVersion = rs.getInt("balanceversion");
+            	float balanceChange = rs.getFloat("balancechange");
+            	float balanceAfter = rs.getFloat("balanceafter");
+            	
+            	Transaction transaction = new Transaction(transactionID, errorCode, balanceVersion, balanceChange, balanceAfter);
+            	transactions.put(transactionID, transaction);
+            }
+            rs.close(); 
+            cn.close();
+        	return transactions;         
+            
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+	    return null;	    
+	}
+	
 	public static void main(String[] args) throws ClassNotFoundException {
 		Connector conn = new Connector();
-		//conn.createTable(SQLstatement.createPlayers);
+		conn.createTable(SQLstatement.createTransactions);
 		//conn.createTable(SQLstatement.createPlayerInfo);
 		Player gosho = conn.selectPlayer("user3");
 		System.out.println(gosho.getUsername()+gosho.getBalance()+gosho.getBalanceVersion());
 		conn.updatePlayer("user3", 6, 1999, 888, true);		
 		Player pesho = conn.selectPlayer("user3");
 		System.out.println(pesho.getUsername()+pesho.getBalance()+pesho.getBalanceVersion());
+		
+		System.out.println(conn.selectTransactions().isEmpty());
 		
 	}
 }

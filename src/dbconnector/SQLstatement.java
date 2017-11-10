@@ -12,6 +12,15 @@ public class SQLstatement {
             + "balance float not null"
             + ")";
 	
+	public static String createTransactions = "CREATE table transactions("
+            + "id integer primary key autoincrement,"           
+            + "transactionid int not null,"
+            + "errorcode int not null,"
+            + "balanceversion int not null,"
+            + "balancechange float not null,"
+            + "balanceafter float not null"
+            + ")";
+	
 	public static String createPlayerInfo = "CREATE table player_info("
             + "id integer,"
             + "balancelimit float,"
@@ -26,6 +35,15 @@ public class SQLstatement {
 	public static String selectPlayerInfo = "SELECT balancelimit, blacklisted "
 			+ "FROM player_info "
 			+ "WHERE id=";
+	
+	public static String selectTransactions = "SELECT "
+            + "transactionid,"
+            + "errorcode,"
+            + "balanceversion,"
+            + "balancechange,"
+            + "balanceafter "
+			+ "FROM transactions "
+			+ "LIMIT 1000";
 		
 	public static String updatePlayers = "UPDATE players "
 			+ "SET balance_version = ?, "
