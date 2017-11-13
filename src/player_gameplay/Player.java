@@ -1,14 +1,18 @@
 package player_gameplay;
 
+import dbconnector.Connector;
+
 public class Player {
 	
 	private String username;
 	private Balance myBalance;
+	Connector conn;
 	
 	public Player(String username, Balance myBalance) {
 		super();
 		this.username = username;
 		this.myBalance = myBalance;
+		conn = new Connector();
 	}
 
 	public String getUsername() {
@@ -38,6 +42,15 @@ public class Player {
 			error = Error.OK;
 		}
 		return error.getErrorCode();
+	}
+	
+	public void updateToDB(){
+		try {
+			conn.updatePlayer(username, myBalance.getVersion(), myBalance.getWalletBalance(), myBalance.getLimit(), myBalance.isBlacklisted());
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

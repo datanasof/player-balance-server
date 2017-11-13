@@ -37,13 +37,26 @@ public class SQLstatement {
 			+ "WHERE id=";
 	
 	public static String selectTransactions = "SELECT "
-            + "transactionid,"
+			+ "transactionid,"
             + "errorcode,"
             + "balanceversion,"
             + "balancechange,"
             + "balanceafter "
-			+ "FROM transactions "
-			+ "LIMIT 1000";
+			+ "FROM "
+			+ "(SELECT * FROM transactions ORDER BY id DESC LIMIT 1000) "
+			+ "ORDER BY id ASC";
+		
+	public static String addTransaction = "INSERT INTO transactions "
+			+ "SELECT "
+			+ "d% AS id, "			
+			+ "d% AS transactionid,"
+			+ "d% AS errorcode,"
+			+ "d% AS balanceversion,"
+			+ "f% AS balancechange,"
+			+ "f% AS balanceafter ";
+	
+	public static String addAdditionalTransaction = "UNION ALL SELECT "
+			+ "d%,d%,d%,d%,f%,f% ";
 		
 	public static String updatePlayers = "UPDATE players "
 			+ "SET balance_version = ?, "
@@ -54,6 +67,10 @@ public class SQLstatement {
 			+ "SET balancelimit = ?, "
 			+ "blacklisted = ? "
 			+ "WHERE player_info.id = ?";
+	
+	public static void main(String[] args) {
+		System.out.println(String.format(addTransaction, 5, 99,0,5,55,945));
+	}
 	
 
 }
