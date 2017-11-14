@@ -1,7 +1,5 @@
 package player_gameplay;
 
-import java.util.HashMap;
-
 public class Transaction {
 	int id;
 	int errorCode;

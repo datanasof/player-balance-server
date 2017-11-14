@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import player_gameplay.Balance;
 import player_gameplay.Player;
@@ -37,8 +36,7 @@ public class Connector {
 	            prepSt.executeUpdate();
 	            prepSt.close();
 	        } catch (Exception e) {
-	            System.out.println(e.getMessage());
-	            
+	            System.out.println(e.getMessage());	            
 	        }	
 	        cn.close();
 	    } catch (Exception e) {
@@ -82,29 +80,45 @@ public class Connector {
 	    return null;	    
 	}
 	
-	private int getPlayerID (String username) throws ClassNotFoundException {
-	    Connection cn = getConnected(urlDB);	    
-	    try {
-	        Statement stmt;
-	        try {
-	            stmt = cn.createStatement();	            
-	            ResultSet rs = stmt.executeQuery(SQLstatement.selectPlayer + String.format("\"%s\"",username));	            
-	            	            
-	            if(rs.next()){
-	            	int id = rs.getInt("id");
-	            	rs.close();
-	            	cn.close();
-	        		return id;
-	            }
-	            rs.close();
-            	cn.close();	            
-	        } catch (Exception e) {
-	            System.out.println(e.getMessage());
-	        }	        	               
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-	    return 0;	    
+	private int getNewPlayerID() {  
+		int id = 0;	
+		try {
+        	Connection cn = getConnected(urlDB);
+	        Statement stmt = cn.createStatement();	            
+            ResultSet rs = stmt.executeQuery(String.format("SELECT MAX(id) as maxID FROM players"));	            
+            
+            if(rs.next()){
+            	id = rs.getInt("maxID")+1;	            	
+            }
+            rs.close();
+        	cn.close();
+    		return id;            
+           
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        } 
+        return id;
+	}
+	
+	
+	private int getPlayerID (String username) {  
+		int id = 0;	
+		try {
+        	Connection cn = getConnected(urlDB);
+	        Statement stmt = cn.createStatement();	            
+            ResultSet rs = stmt.executeQuery(SQLstatement.selectPlayer + String.format("\"%s\"",username));	            
+                        
+            if(rs.next()){
+            	id = rs.getInt("id");            	         	
+            } 
+            rs.close();
+        	cn.close();
+    		return id;   
+           
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        } 
+        return id;
 	}
 	
 	private List<Object> selectPlayerInfo(int id) throws ClassNotFoundException, SQLException {
@@ -148,7 +162,7 @@ public class Connector {
 		Connection cn = getConnected(urlDB);
 				
         try {
-        	PreparedStatement prepst = cn.prepareStatement(SQLstatement.updatePlayers); 
+        	PreparedStatement prepst = cn.prepareStatement(SQLstatement.updatePlayers);         	
         	prepst.setInt(1, balanceVersion);
             prepst.setFloat(2, balance);
             prepst.setInt(3, id);            
@@ -176,9 +190,48 @@ public class Connector {
     
 	public void updatePlayer(String username, int balanceVersion, float balance, float balanceLimit, boolean blacklisted) throws ClassNotFoundException {
 		int id = getPlayerID(username);
-		updatePlayers(id, balanceVersion, balance);
-		updatePlayerInfo(id, balanceLimit, blacklisted);
+		System.out.println(id);
+		if(id == 0){
+			int PlayerID = getNewPlayerID();
+			System.out.println(PlayerID);
+			addNewPlayer(PlayerID, username, balanceVersion, balance);
+			addNewPlayerInfo(PlayerID, balanceLimit, blacklisted);
+		} else{
+			updatePlayers(id, balanceVersion, balance);
+			updatePlayerInfo(id, balanceLimit, blacklisted);
+		}		
     }
+	
+	private void addNewPlayer(int id, String username, int balanceVersion, float balance) throws ClassNotFoundException {
+		
+		try {			
+			Connection cn = getConnected(urlDB);
+        	PreparedStatement prepst = cn.prepareStatement(SQLstatement.addPlayer);         	
+        	prepst.setInt(1, id);  
+        	prepst.setString(2, username);  
+        	prepst.setInt(3, balanceVersion);
+            prepst.setFloat(4, balance);
+            prepst.executeUpdate();
+            cn.close();   
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+	
+	private void addNewPlayerInfo(int id, float balanceLimit, boolean blacklisted) throws ClassNotFoundException {
+		
+        try {
+        	Connection cn = getConnected(urlDB);
+        	PreparedStatement prepst = cn.prepareStatement(SQLstatement.addPlayerInfo); 
+        	prepst.setInt(1, id); 
+        	prepst.setFloat(2, balanceLimit);
+            prepst.setBoolean(3, blacklisted);            
+            prepst.executeUpdate();
+            cn.close();   
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }	
 	
 	private int takeLastTansactionId(){			    
 	    try {
@@ -281,18 +334,6 @@ public class Connector {
             System.out.println(e.getMessage());
         }
 	    return null;	    
-	}
+	}	
 	
-	public static void main(String[] args) throws ClassNotFoundException {
-		Connector conn = new Connector();
-		//conn.createTable(SQLstatement.createTransactions);
-		//conn.createTable(SQLstatement.createPlayerInfo);
-		HashMap<Integer, Transaction> trlist = new HashMap<Integer, Transaction>();
-		System.out.println(conn.selectTransactions().isEmpty());
-		for(Transaction tr:conn.selectTransactions()){
-			System.out.println(tr.getId());
-			trlist.put(tr.getId(), tr);
-		}
-		System.out.println(conn.takeLastTansactionId());
-	}
 }

@@ -59,18 +59,28 @@ public class SQLstatement {
 			+ "?,?,?,?,?,? ";
 		
 	public static String updatePlayers = "UPDATE players "
-			+ "SET balance_version = ?, "
+			+ "SET "			
+			+ "balance_version = ?, "
 			+ "balance = ? "
 			+ "WHERE players.id = ?";
 			
 	public static String updatePlayerInfo = "UPDATE player_info "
-			+ "SET balancelimit = ?, "
+			+ "SET "	
+			+ "balancelimit = ?, "
 			+ "blacklisted = ? "
 			+ "WHERE player_info.id = ?";
 	
-	public static void main(String[] args) {
-		System.out.println(String.format(addTransaction, 5, 99,0,5,55,945));
-	}
+	public static String addPlayer = "INSERT INTO players "
+			+ "SELECT "
+			+ "? AS id, "
+			+ "? AS username, "
+			+ "? AS balance_version, "
+			+ "? AS balance";
 	
-
+	public static String addPlayerInfo = "INSERT INTO player_info "
+			+ "SELECT "
+			+ "? AS id, "	
+			+ "? AS balancelimit, "
+			+ "? AS blacklisted";
+	
 }
