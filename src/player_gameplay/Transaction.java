@@ -1,5 +1,7 @@
 package player_gameplay;
 
+import java.util.HashMap;
+
 public class Transaction {
 	int id;
 	int errorCode;
@@ -44,7 +46,7 @@ public class Transaction {
 	public void setBalanceAfter(float balanceAfter) {
 		this.balanceAfter = balanceAfter;
 	}
-	
+		
 	public String printTransaction(){
 		return(id+", "+errorCode+", "+balanceVersion+", "+balanceCahnge+", "+balanceAfter);
 	}

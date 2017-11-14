@@ -204,50 +204,54 @@ public class Connector {
 	    }
 	    return 0;	    
 		
-	}
-	
-	private String addTransactionSQL(Transaction transaction, int id){
-		int trid = transaction.getId();
-		int error = transaction.getErrorCode();
-		int balver = transaction.getBalanceVersion();
-		float balchange = transaction.getBalanceCahnge();
-		float balafter = transaction.getBalanceAfter();
-		String sql = String.format(SQLstatement.addTransaction, id, trid,error,balver,balchange,balafter);
-		return sql;
-	}
-	private String addAdditionalTransactionSQL(Transaction transaction, int id){
-		int trid = transaction.getId();
-		int error = transaction.getErrorCode();
-		int balver = transaction.getBalanceVersion();
-		float balchange = transaction.getBalanceCahnge();
-		float balafter = transaction.getBalanceAfter();
-		String sql = String.format(SQLstatement.addAdditionalTransaction, id, trid,error,balver,balchange,balafter);
-		return sql;
+	}	
+	private String updateTransactionsSQL(int i){
+		StringBuilder sb = new StringBuilder();
+		sb.append(SQLstatement.addTransaction);
+		
+		while(i>1){
+			sb.append(SQLstatement.addAdditionalTransaction);
+			i--;
+		}
+		return sb.toString();
 	}
 	
 	public boolean updateTransactions(List<Transaction>transactions) throws ClassNotFoundException {
-		if(transactions.size()<1) return false;
+		int trSize = transactions.size();		
+		if(trSize<1) return false;
+				
+		String stmtSQL = updateTransactionsSQL(trSize);
+		int position = 1;
 		int nextTransactionID = takeLastTansactionId()+1;
-		Connection cn = getConnected(urlDB);
-		
-		StringBuilder sb = new StringBuilder();
-		sb.append(addTransactionSQL(transactions.get(0), nextTransactionID));
-		if(transactions.size()>1){
-			
-			for(Transaction transaction: transactions.subList(1,transactions.size()-1)){
-				nextTransactionID += 1;
-				sb.append(addAdditionalTransactionSQL(transaction,nextTransactionID));
-			}
-		}
-		
-        try {
-        	System.out.println(sb.toString());
-        	PreparedStatement prepst = cn.prepareStatement(sb.toString());         	
+	
+		try {			
+			Connection cn = getConnected(urlDB);
+        	PreparedStatement prepst = cn.prepareStatement(stmtSQL); 
+        	Transaction firstTr = transactions.get(0);
+        	
+        	prepst.setInt(position, nextTransactionID);
+        	prepst.setInt(position+1, firstTr.getId());
+        	prepst.setInt(position+2, firstTr.getErrorCode());
+        	prepst.setInt(position+3, firstTr.getBalanceVersion());
+        	prepst.setFloat(position+4, firstTr.getBalanceCahnge());
+        	prepst.setFloat(position+5, firstTr.getBalanceAfter());
+        	
+        	for(Transaction ntr:transactions.subList(1, transactions.size())){
+        		position += 6;
+    			nextTransactionID += 1;	
+        		prepst.setInt(position, nextTransactionID);
+            	prepst.setInt(position+1, ntr.getId());
+            	prepst.setInt(position+2, ntr.getErrorCode());
+            	prepst.setInt(position+3, ntr.getBalanceVersion());
+            	prepst.setFloat(position+4, ntr.getBalanceCahnge());
+            	prepst.setFloat(position+5, ntr.getBalanceAfter());
+    		}
+
             prepst.executeUpdate();
             cn.close();   
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-        }		
+        }
 		return true;		
     }
 	

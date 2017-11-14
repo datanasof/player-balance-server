@@ -48,15 +48,15 @@ public class SQLstatement {
 		
 	public static String addTransaction = "INSERT INTO transactions "
 			+ "SELECT "
-			+ "d% AS id, "			
-			+ "d% AS transactionid,"
-			+ "d% AS errorcode,"
-			+ "d% AS balanceversion,"
-			+ "f% AS balancechange,"
-			+ "f% AS balanceafter ";
+			+ "? AS id, "			
+			+ "? AS transactionid,"
+			+ "? AS errorcode,"
+			+ "? AS balanceversion,"
+			+ "? AS balancechange,"
+			+ "? AS balanceafter ";
 	
 	public static String addAdditionalTransaction = "UNION ALL SELECT "
-			+ "d%,d%,d%,d%,f%,f% ";
+			+ "?,?,?,?,?,? ";
 		
 	public static String updatePlayers = "UPDATE players "
 			+ "SET balance_version = ?, "

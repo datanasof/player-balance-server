@@ -16,12 +16,12 @@ public class Tester {
 		
 		
 		System.out.println(gameplay.makeTransaction("Mitio", 201, -400).printTransaction());
-		/**System.out.println(gameplay.makeTransaction("Mitio", 201, -400).printTransaction());
+		System.out.println(gameplay.makeTransaction("Mitio", 201, -400).printTransaction());
 		System.out.println(gameplay.makeTransaction("Mitio", 202, -600).printTransaction());
 		System.out.println(gameplay.makeTransaction("Mitio", 203, -100).printTransaction());
 		System.out.println(gameplay.makeTransaction("Mitio", 204, 700).printTransaction());
 		System.out.println(gameplay.makeTransaction("Mitio", 205, 600).printTransaction());
-		System.out.println(gameplay.makeTransaction("Mitio", 204, 700).printTransaction());**/
+		System.out.println(gameplay.makeTransaction("Mitio", 209, 200).printTransaction());
 		gameplay.transactionsToDB();
 		
 	}
