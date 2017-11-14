@@ -52,7 +52,7 @@ public class PlayersList {
 		float balanceBefore = player.getBalance();
 		int errorCode = player.changeBalance(change);
 		float balanceAfter = player.getBalance();
-		float balanceChange = balanceBefore - balanceAfter;
+		float balanceChange = balanceAfter - balanceBefore;
 		int balanceVersion = player.getBalanceVersion();
 		
 		List<Object> tr = Arrays.asList(errorCode, balanceVersion, balanceChange, balanceAfter);
