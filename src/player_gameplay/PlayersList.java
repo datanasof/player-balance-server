@@ -1,12 +1,14 @@
 package player_gameplay;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import dbconnector.Connector;
 
-public class PlayersList {
+public class PlayersList implements Iterable<Player>{
 	Connector conn;
 	HashMap<String, Player> players;
 		
@@ -14,6 +16,12 @@ public class PlayersList {
 		conn = new Connector();
 		players = new HashMap<String, Player>();		
 	}
+	
+	@Override
+    public Iterator<Player> iterator() {
+		List<Player> plist = new ArrayList<Player>(players.values());
+        return plist.iterator();
+    }
 	
 	private Player getPlayerFromDB(String username){
 		try {
@@ -58,6 +66,6 @@ public class PlayersList {
 		List<Object> tr = Arrays.asList(errorCode, balanceVersion, balanceChange, balanceAfter);
 		updatePlayer(player);
 		return tr;
-	}
+	}	
 
 }

@@ -15,8 +15,7 @@ public class Client {
             BufferedReader in = new BufferedReader(
                 new InputStreamReader(ClientSocket.getInputStream()));
         ) {
-            BufferedReader stdIn =
-                new BufferedReader(new InputStreamReader(System.in));
+            //BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
             String fromServer;
             String fromUser;
  
