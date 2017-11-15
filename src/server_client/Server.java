@@ -6,12 +6,7 @@ import java.io.*;
 public class Server {
     public static void main(String[] args) throws IOException {
         
-        if (args.length != 1) {
-            System.err.println("Usage: Java Server <port number>");
-            System.exit(1);
-        }
-
-        int portNumber = 55555;//Integer.parseInt(args[0]);
+        int portNumber = 5555;
 
         try ( 
             ServerSocket serverSocket = new ServerSocket(portNumber);
@@ -32,7 +27,7 @@ public class Server {
             while ((inputLine = in.readLine()) != null) {
                 outputLine = comp.processInput(inputLine);
                 out.println(outputLine);
-                if (outputLine.equals("Bye."))
+                if (outputLine.equals("Bye"))
                     break;
             }
         } catch (IOException e) {

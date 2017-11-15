@@ -46,37 +46,52 @@ public class Connector {
 	}
 	
 	public Player selectPlayer (String username) throws ClassNotFoundException {
-	    Connection cn = getConnected(urlDB);
 	    
-	    try {
-	        Statement stmt;
-	        try {
-	            stmt = cn.createStatement();	            
-	            ResultSet rs = stmt.executeQuery(SQLstatement.selectPlayer + String.format("\"%s\"",username));	            
-	            	            
-	            if(rs.next()){
-	            	int id = rs.getInt("id");	               
-	            	int balanceVersion = rs.getInt("balance_version");	               
-	            	float balance = rs.getFloat("balance");
-	            	List<Object> playerInfo = selectPlayerInfo(id);
-	            	float balanceLimit = (float) playerInfo.get(0);
-	            	boolean blacklisted = (boolean) playerInfo.get(1);
-	        		
-	            	Balance myBalance = new Balance(balanceVersion, balance, balanceLimit, blacklisted);
-	        		Player player = new Player(username, myBalance);
-	        		cn.close();
-	        		rs.close();
-	        		return player;
-	            }            
-	            
-	        } catch (Exception e) {
-	            System.out.println(e.getMessage());
-	        }	        
-	        cn.close();
-	        
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
+        try {
+        	Connection cn = getConnected(urlDB);
+        	Statement stmt = cn.createStatement();	            
+            ResultSet rs = stmt.executeQuery(SQLstatement.selectPlayer + String.format("\"%s\"",username));	            
+            	            
+            if(rs.next()){
+            	int id = rs.getInt("id");	               
+            	int balanceVersion = rs.getInt("balance_version");	               
+            	float balance = rs.getFloat("balance");
+            	List<Object> playerInfo = selectPlayerInfo(id);
+            	float balanceLimit = (float) playerInfo.get(0);
+            	boolean blacklisted = (boolean) playerInfo.get(1);
+        		
+            	Balance myBalance = new Balance(balanceVersion, balance, balanceLimit, blacklisted);
+        		Player player = new Player(username, myBalance);
+        		cn.close();
+        		rs.close();
+        		return player;
+            }            
+            cn.close();
+    		rs.close();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }	 
+	    return null;	    
+	}
+	
+	public List<String> selectPlayersNames () throws ClassNotFoundException {		
+        try {
+        	Connection cn = getConnected(urlDB);
+    	    List<String> userNames = new ArrayList<String>();
+        	Statement stmt = cn.createStatement();	            
+            ResultSet rs = stmt.executeQuery(SQLstatement.selectPlayerNames);	            
+            	            
+            while(rs.next()){
+            	String name = rs.getString("username");
+            	userNames.add(name);
+            }	
+        		cn.close();
+        		rs.close();
+        		return userNames;
+            
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }	        	        
 	    return null;	    
 	}
 	
