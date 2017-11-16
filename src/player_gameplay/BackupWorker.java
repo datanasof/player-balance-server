@@ -13,7 +13,7 @@ public class BackupWorker implements Runnable {
 	public void run() {
 		for(Player p: players){
 			players.updatePlayerToDB(p);	
-			System.out.println(p.getUsername()+": "+p.isBlacklisted());
+			
 		}
 		transactions.updateToDB();
 		System.out.println("Server: updating Database..");

@@ -3,17 +3,17 @@ package server_client;
 import java.util.List;
 import java.util.Random;
 
-import dbconnector.Connector;
+import dbconnector.DBhelper;
 
 public class Randomizer {
-	private Connector conn = new Connector();
 	private Random randomGenerator;
     private List<String> playerNames;
 
-    public Randomizer()
+    @SuppressWarnings("static-access")
+	public Randomizer()
     { 
         try {
-			playerNames = conn.selectPlayersNames();
+			playerNames = DBhelper.getInstance().selectPlayersNames();
 		} catch (ClassNotFoundException e) {			
 			e.printStackTrace();
 		}

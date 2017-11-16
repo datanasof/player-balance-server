@@ -14,9 +14,9 @@ import player_gameplay.Transaction;
 
 public class Connector {
 	
-	private String urlDB = SQLstatement.urlDB;
+	private static String urlDB = SQLstatement.urlDB;
 	
-	private Connection getConnected(String url) throws ClassNotFoundException{
+	private static Connection getConnected(String url) throws ClassNotFoundException{
 		try {
 			Class.forName("org.sqlite.JDBC");
 			Connection conn = DriverManager.getConnection(url);
@@ -28,7 +28,7 @@ public class Connector {
 		}		
 	}
 	
-	public void createTable(String sqlSt) throws ClassNotFoundException{
+	public static void createTable(String sqlSt) throws ClassNotFoundException{
 	    Connection cn = getConnected(urlDB);   
 	    try {
 	        PreparedStatement prepSt;
@@ -46,7 +46,7 @@ public class Connector {
 	    
 	}
 	
-	public Player selectPlayer (String username) throws ClassNotFoundException {
+	public static Player selectPlayer (String username) throws ClassNotFoundException {
 	    
         try {
         	Connection cn = getConnected(urlDB);
@@ -75,7 +75,7 @@ public class Connector {
 	    return null;	    
 	}
 	
-	public List<String> selectPlayersNames () throws ClassNotFoundException {		
+	public static List<String> selectPlayersNames () throws ClassNotFoundException {		
         try {
         	Connection cn = getConnected(urlDB);
     	    List<String> userNames = new ArrayList<String>();
@@ -96,7 +96,7 @@ public class Connector {
 	    return null;	    
 	}
 	
-	private int getNewPlayerID() {  
+	private static int getNewPlayerID() {  
 		int id = 0;	
 		try {
         	Connection cn = getConnected(urlDB);
@@ -117,7 +117,7 @@ public class Connector {
 	}
 	
 	
-	private int getPlayerID (String username) {  
+	private static int getPlayerID (String username) {  
 		int id = 0;	
 		try {
         	Connection cn = getConnected(urlDB);
@@ -137,7 +137,7 @@ public class Connector {
         return id;
 	}
 	
-	private List<Object> selectPlayerInfo(int id) throws ClassNotFoundException, SQLException {
+	private static List<Object> selectPlayerInfo(int id) throws ClassNotFoundException, SQLException {
 	    Connection cn = getConnected(urlDB);	    
 	    Statement stmt;
         try {
@@ -146,27 +146,25 @@ public class Connector {
             List<Object> playerInfo = new ArrayList<Object>();	            
             if(rs.next()){         
             	float balanceLimit = rs.getFloat("balancelimit");
-            	boolean blacklisted = rs.getBoolean("blacklisted");            	
+            	boolean blacklisted = rs.getInt("blacklisted") > 0;
+            	     	
             	rs.close(); 
             	
-            	if(balanceLimit != 0.0){
-            		playerInfo.add(balanceLimit);
-            	} 
-            	else{
-            		playerInfo.add(SQLstatement.defaultBalanceLimit);	            		
+            	if(balanceLimit == 0.0){
+            		balanceLimit = SQLstatement.defaultBalanceLimit;	            		
             	}
-            	
+            	playerInfo.add(balanceLimit);
             	playerInfo.add(blacklisted);
             	cn.close();
             	return playerInfo;
             }
             
-            else{
+            /**else{
             	playerInfo.add(SQLstatement.defaultBalanceLimit);
             	playerInfo.add(false);
             	cn.close();
             	return playerInfo;
-            }
+            }**/
             
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -174,7 +172,7 @@ public class Connector {
 	    return null;	    
 	}
 	
-	private void updatePlayers(int id, int balanceVersion, float balance) throws ClassNotFoundException {
+	private static void updatePlayers(int id, int balanceVersion, float balance) throws ClassNotFoundException {
 		Connection cn = getConnected(urlDB);
 				
         try {
@@ -189,13 +187,13 @@ public class Connector {
         }
     }
 	
-	private void updatePlayerInfo(int id, float balanceLimit, boolean blacklisted) throws ClassNotFoundException {
+	private static void updatePlayerInfo(int id, float balanceLimit, int blacklisted) throws ClassNotFoundException {
 					
         try {
         	Connection cn = getConnected(urlDB);
         	PreparedStatement prepst = cn.prepareStatement(SQLstatement.updatePlayerInfo); 
         	prepst.setFloat(1, balanceLimit);
-            prepst.setBoolean(2, blacklisted);
+            prepst.setInt(2, blacklisted);
             prepst.setInt(3, id); 
             prepst.executeUpdate();
             cn.close();   
@@ -204,21 +202,27 @@ public class Connector {
         }
     }	
     
-	public void updatePlayer(String username, int balanceVersion, float balance, float balanceLimit, boolean blacklisted) throws ClassNotFoundException {
+	private static int transformBlacklisted(boolean blacklisted){		
+		if(blacklisted){
+			return 1;
+		} else return 0;
+	}
+	
+	public static void updatePlayer(String username, int balanceVersion, float balance, float balanceLimit, boolean blacklisted) throws ClassNotFoundException {
 		int id = getPlayerID(username);
-		System.out.println(id);
+		
 		if(id == 0){
 			int PlayerID = getNewPlayerID();
-			System.out.println(PlayerID);
+			//System.out.println(PlayerID);
 			addNewPlayer(PlayerID, username, balanceVersion, balance);
-			addNewPlayerInfo(PlayerID, balanceLimit, blacklisted);
+			addNewPlayerInfo(PlayerID, balanceLimit, transformBlacklisted(blacklisted));
 		} else{
 			updatePlayers(id, balanceVersion, balance);
-			updatePlayerInfo(id, balanceLimit, blacklisted);
+			updatePlayerInfo(id, balanceLimit, transformBlacklisted(blacklisted));
 		}		
     }
 	
-	private void addNewPlayer(int id, String username, int balanceVersion, float balance) throws ClassNotFoundException {
+	private static void addNewPlayer(int id, String username, int balanceVersion, float balance) throws ClassNotFoundException {
 		
 		try {			
 			Connection cn = getConnected(urlDB);
@@ -234,14 +238,14 @@ public class Connector {
         }
     }
 	
-	private void addNewPlayerInfo(int id, float balanceLimit, boolean blacklisted) throws ClassNotFoundException {
+	private static void addNewPlayerInfo(int id, float balanceLimit, int blacklisted) throws ClassNotFoundException {
 		
         try {
         	Connection cn = getConnected(urlDB);
         	PreparedStatement prepst = cn.prepareStatement(SQLstatement.addPlayerInfo); 
         	prepst.setInt(1, id); 
         	prepst.setFloat(2, balanceLimit);
-            prepst.setBoolean(3, blacklisted);            
+            prepst.setInt(3, blacklisted);            
             prepst.executeUpdate();
             cn.close();   
         } catch (SQLException e) {
@@ -249,7 +253,7 @@ public class Connector {
         }
     }	
 	
-	private int takeLastTansactionId(){			    
+	private static int takeLastTansactionId(){			    
 	    try {
 	    	Connection cn = getConnected(urlDB);
 	        Statement stmt;
@@ -274,7 +278,7 @@ public class Connector {
 	    return 0;	    
 		
 	}	
-	private String updateTransactionsSQL(int i){
+	private static String updateTransactionsSQL(int i){
 		StringBuilder sb = new StringBuilder();
 		sb.append(SQLstatement.addTransaction);
 		
@@ -285,7 +289,7 @@ public class Connector {
 		return sb.toString();
 	}
 	
-	public boolean updateTransactions(List<Transaction>transactions) throws ClassNotFoundException {
+	public static boolean updateTransactions(List<Transaction>transactions) throws ClassNotFoundException {
 		int trSize = transactions.size();		
 		if(trSize<1) return false;
 				
@@ -324,7 +328,7 @@ public class Connector {
 		return true;		
     }
 	
-	public List<Transaction> selectTransactions() {
+	public static List<Transaction> selectTransactions() {
         try {
         	Connection cn = getConnected(urlDB);		
     	    Statement stmt;

@@ -6,14 +6,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import dbconnector.Connector;
+import dbconnector.DBhelper;
 
-public class PlayersList implements Iterable<Player>{
-	Connector conn;
+public class PlayersList implements Iterable<Player>{	
 	HashMap<String, Player> players;
 		
-	public PlayersList(){		
-		conn = new Connector();
+	public PlayersList(){
 		players = new HashMap<String, Player>();		
 	}
 	
@@ -23,14 +21,25 @@ public class PlayersList implements Iterable<Player>{
         return plist.iterator();
     }
 	
+	@SuppressWarnings("static-access")
 	private Player getPlayerFromDB(String username){
 		try {
-			return conn.selectPlayer(username);
+			return DBhelper.getInstance().selectPlayer(username);
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	@SuppressWarnings("static-access")
+	public void updatePlayerToDB(Player p){
+		try {
+			DBhelper.getInstance().updatePlayer(p.getUsername(), p.getBalanceVersion(), p.getBalance(), p.getBalanceLimit(), p.isBlacklisted());
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public Player getPlayer(String username){
@@ -44,16 +53,7 @@ public class PlayersList implements Iterable<Player>{
 	private void updatePlayer(Player player){
 		players.put(player.getUsername(), player);
 	}
-	
-	public void updatePlayerToDB(Player p){
-		try {
-			conn.updatePlayer(p.getUsername(), p.getBalanceVersion(), p.getBalance(), p.getBalanceLimit(), p.isBlacklisted());
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
+		
 	public List<Object> playerTransaction(String username, float change){		
 		Player player = getPlayer(username);
 		

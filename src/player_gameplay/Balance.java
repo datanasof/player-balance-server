@@ -7,14 +7,6 @@ public class Balance {
 	private float limit;
 	private boolean blacklisted;
 	
-	public Balance(int version, float walletBalance, float limit) {
-		super();
-		this.version = version;
-		this.walletBalance = walletBalance;
-		this.limit = limit;
-		this.blacklisted = false;
-	}
-	
 	public Balance(int version, float walletBalance, float limit, boolean blacklisted) {
 		super();
 		this.version = version;

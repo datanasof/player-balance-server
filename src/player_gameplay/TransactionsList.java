@@ -6,16 +6,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-import dbconnector.Connector;
+import dbconnector.DBhelper;
 
 public class TransactionsList {
 	HashMap<Integer, Transaction> transactionsMap;
 	Queue<Transaction> transactionsQueue;
 	List<Transaction> transactionsToDB;
-	Connector conn;
-	
-	public TransactionsList(){		
-		conn = new Connector();
+		
+	public TransactionsList(){				
 		transactionsQueue = new LinkedList<Transaction>(); 
 		transactionsToDB = new ArrayList<Transaction>();
 		transactionsMap = new HashMap<Integer, Transaction>();
@@ -43,16 +41,18 @@ public class TransactionsList {
 		}		
 	}	
 	
+	@SuppressWarnings("static-access")
 	public void populateFromDB(){
-			List<Transaction> transactions = conn.selectTransactions();
+			List<Transaction> transactions = DBhelper.getInstance().selectTransactions();
 			for(Transaction tr:transactions){
 				addTransaction(tr);
 			}
 	}
 	
+	@SuppressWarnings("static-access")
 	public boolean updateToDB(){
 		try {
-			conn.updateTransactions(transactionsToDB);
+			DBhelper.getInstance().updateTransactions(transactionsToDB);
 			transactionsToDB.clear();
 			return true;
 		} catch (ClassNotFoundException e) {
