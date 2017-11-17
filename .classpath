@@ -6,6 +6,6 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="lib" path="C:/Users/daatanasov/workspace/player-balance-server/sqlite-jdbc-3.20.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Dimitar/git/player-balance-server/sqlite-jdbc-3.20.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -19,9 +19,8 @@ public class PlayersList implements Iterable<Player>{
     public Iterator<Player> iterator() {
 		List<Player> plist = new ArrayList<Player>(players.values());
         return plist.iterator();
-    }
+    }	
 	
-	@SuppressWarnings("static-access")
 	private Player getPlayerFromDB(String username){
 		try {
 			return DBhelper.getInstance().selectPlayer(username);
@@ -30,9 +29,8 @@ public class PlayersList implements Iterable<Player>{
 			e.printStackTrace();
 		}
 		return null;
-	}
+	}	
 	
-	@SuppressWarnings("static-access")
 	public void updatePlayerToDB(Player p){
 		try {
 			DBhelper.getInstance().updatePlayer(p.getUsername(), p.getBalanceVersion(), p.getBalance(), p.getBalanceLimit(), p.isBlacklisted());

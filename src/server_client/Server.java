@@ -36,7 +36,7 @@ public class Server {
             
             ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
             ScheduledFuture<?> future = executor.scheduleAtFixedRate(new BackupWorker(comp.getPlayersList(), comp.getTransactionsList()), 
-                 0, 30, TimeUnit.SECONDS); 
+                 0, 20, TimeUnit.SECONDS); 
 
             while ((inputLine = in.readLine()) != null) {
                 outputLine = comp.processInput(inputLine);

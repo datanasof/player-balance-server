@@ -13,10 +13,18 @@ import player_gameplay.Player;
 import player_gameplay.Transaction;
 
 public class Connector {
-	
-	private static String urlDB = SQLstatement.urlDB;
-	
-	private static Connection getConnected(String url) throws ClassNotFoundException{
+	private Connection conn;
+	private static final String urlDB = SQLstatement.urlDB;
+	public Connector() {
+		try {
+			this.conn = getConnected(urlDB);
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+		
+	private Connection getConnected(String url) throws ClassNotFoundException{
 		try {
 			Class.forName("org.sqlite.JDBC");
 			Connection conn = DriverManager.getConnection(url);
@@ -28,29 +36,29 @@ public class Connector {
 		}		
 	}
 	
-	public static void createTable(String sqlSt) throws ClassNotFoundException{
-	    Connection cn = getConnected(urlDB);   
+	public void createTable(String sqlSt) throws ClassNotFoundException{
+	    
 	    try {
 	        PreparedStatement prepSt;
 	        try {
-	            prepSt = cn.prepareStatement(sqlSt);
+	            prepSt = conn.prepareStatement(sqlSt);
 	            prepSt.executeUpdate();
 	            prepSt.close();
 	        } catch (Exception e) {
 	            System.out.println(e.getMessage());	            
 	        }	
-	        cn.close();
+	        
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
 	    
 	}
 	
-	public static Player selectPlayer (String username) throws ClassNotFoundException {
+	public Player selectPlayer (String username) throws ClassNotFoundException {
 	    
         try {
-        	Connection cn = getConnected(urlDB);
-        	Statement stmt = cn.createStatement();	            
+        	
+        	Statement stmt = conn.createStatement();	            
             ResultSet rs = stmt.executeQuery(SQLstatement.selectPlayer + String.format("\"%s\"",username));	            
             	            
             if(rs.next()){
@@ -63,11 +71,11 @@ public class Connector {
         		
             	Balance myBalance = new Balance(balanceVersion, balance, balanceLimit, blacklisted);
         		Player player = new Player(username, myBalance);
-        		cn.close();
+        		
         		rs.close();
         		return player;
             }            
-            cn.close();
+            
     		rs.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -75,18 +83,17 @@ public class Connector {
 	    return null;	    
 	}
 	
-	public static List<String> selectPlayersNames () throws ClassNotFoundException {		
-        try {
-        	Connection cn = getConnected(urlDB);
+	public List<String> selectPlayersNames () throws ClassNotFoundException {		
+        try {        	
     	    List<String> userNames = new ArrayList<String>();
-        	Statement stmt = cn.createStatement();	            
+        	Statement stmt = conn.createStatement();	            
             ResultSet rs = stmt.executeQuery(SQLstatement.selectPlayerNames);	            
             	            
             while(rs.next()){
             	String name = rs.getString("username");
             	userNames.add(name);
             }	
-        		cn.close();
+        		
         		rs.close();
         		return userNames;
             
@@ -96,18 +103,17 @@ public class Connector {
 	    return null;	    
 	}
 	
-	private static int getNewPlayerID() {  
+	private int getNewPlayerID() {  
 		int id = 0;	
 		try {
-        	Connection cn = getConnected(urlDB);
-	        Statement stmt = cn.createStatement();	            
+        	
+	        Statement stmt = conn.createStatement();	            
             ResultSet rs = stmt.executeQuery(String.format("SELECT MAX(id) as maxID FROM players"));	            
             
             if(rs.next()){
             	id = rs.getInt("maxID")+1;	            	
             }
-            rs.close();
-        	cn.close();
+            rs.close();        	
     		return id;            
            
         } catch (Exception e) {
@@ -117,18 +123,17 @@ public class Connector {
 	}
 	
 	
-	private static int getPlayerID (String username) {  
+	private int getPlayerID (String username) {  
 		int id = 0;	
 		try {
-        	Connection cn = getConnected(urlDB);
-	        Statement stmt = cn.createStatement();	            
+        	Statement stmt = conn.createStatement();	            
             ResultSet rs = stmt.executeQuery(SQLstatement.selectPlayer + String.format("\"%s\"",username));	            
                         
             if(rs.next()){
             	id = rs.getInt("id");            	         	
             } 
             rs.close();
-        	cn.close();
+        	
     		return id;   
            
         } catch (Exception e) {
@@ -137,11 +142,10 @@ public class Connector {
         return id;
 	}
 	
-	private static List<Object> selectPlayerInfo(int id) throws ClassNotFoundException, SQLException {
-	    Connection cn = getConnected(urlDB);	    
+	private List<Object> selectPlayerInfo(int id) throws ClassNotFoundException, SQLException {
 	    Statement stmt;
         try {
-            stmt = cn.createStatement();	            
+            stmt = conn.createStatement();	            
             ResultSet rs = stmt.executeQuery(SQLstatement.selectPlayerInfo + id);	            
             List<Object> playerInfo = new ArrayList<Object>();	            
             if(rs.next()){         
@@ -155,14 +159,14 @@ public class Connector {
             	}
             	playerInfo.add(balanceLimit);
             	playerInfo.add(blacklisted);
-            	cn.close();
+            	
             	return playerInfo;
             }
             
             /**else{
             	playerInfo.add(SQLstatement.defaultBalanceLimit);
             	playerInfo.add(false);
-            	cn.close();
+            	
             	return playerInfo;
             }**/
             
@@ -172,43 +176,42 @@ public class Connector {
 	    return null;	    
 	}
 	
-	private static void updatePlayers(int id, int balanceVersion, float balance) throws ClassNotFoundException {
-		Connection cn = getConnected(urlDB);
-				
+	private void updatePlayers(int id, int balanceVersion, float balance) throws ClassNotFoundException {
+		
         try {
-        	PreparedStatement prepst = cn.prepareStatement(SQLstatement.updatePlayers);         	
+        	PreparedStatement prepst = conn.prepareStatement(SQLstatement.updatePlayers);         	
         	prepst.setInt(1, balanceVersion);
             prepst.setFloat(2, balance);
             prepst.setInt(3, id);            
             prepst.executeUpdate();
-            cn.close();   
+            
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
 	
-	private static void updatePlayerInfo(int id, float balanceLimit, int blacklisted) throws ClassNotFoundException {
+	private void updatePlayerInfo(int id, float balanceLimit, int blacklisted) throws ClassNotFoundException {
 					
         try {
-        	Connection cn = getConnected(urlDB);
-        	PreparedStatement prepst = cn.prepareStatement(SQLstatement.updatePlayerInfo); 
+        	
+        	PreparedStatement prepst = conn.prepareStatement(SQLstatement.updatePlayerInfo); 
         	prepst.setFloat(1, balanceLimit);
             prepst.setInt(2, blacklisted);
             prepst.setInt(3, id); 
             prepst.executeUpdate();
-            cn.close();   
+            
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }	
     
-	private static int transformBlacklisted(boolean blacklisted){		
+	private int transformBlacklisted(boolean blacklisted){		
 		if(blacklisted){
 			return 1;
 		} else return 0;
 	}
 	
-	public static void updatePlayer(String username, int balanceVersion, float balance, float balanceLimit, boolean blacklisted) throws ClassNotFoundException {
+	public void updatePlayer(String username, int balanceVersion, float balance, float balanceLimit, boolean blacklisted) throws ClassNotFoundException {
 		int id = getPlayerID(username);
 		
 		if(id == 0){
@@ -222,54 +225,53 @@ public class Connector {
 		}		
     }
 	
-	private static void addNewPlayer(int id, String username, int balanceVersion, float balance) throws ClassNotFoundException {
+	private void addNewPlayer(int id, String username, int balanceVersion, float balance) throws ClassNotFoundException {
 		
 		try {			
-			Connection cn = getConnected(urlDB);
-        	PreparedStatement prepst = cn.prepareStatement(SQLstatement.addPlayer);         	
+			
+        	PreparedStatement prepst = conn.prepareStatement(SQLstatement.addPlayer);         	
         	prepst.setInt(1, id);  
         	prepst.setString(2, username);  
         	prepst.setInt(3, balanceVersion);
             prepst.setFloat(4, balance);
             prepst.executeUpdate();
-            cn.close();   
+            
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
 	
-	private static void addNewPlayerInfo(int id, float balanceLimit, int blacklisted) throws ClassNotFoundException {
+	private void addNewPlayerInfo(int id, float balanceLimit, int blacklisted) throws ClassNotFoundException {
 		
         try {
-        	Connection cn = getConnected(urlDB);
-        	PreparedStatement prepst = cn.prepareStatement(SQLstatement.addPlayerInfo); 
+        	
+        	PreparedStatement prepst = conn.prepareStatement(SQLstatement.addPlayerInfo); 
         	prepst.setInt(1, id); 
         	prepst.setFloat(2, balanceLimit);
             prepst.setInt(3, blacklisted);            
             prepst.executeUpdate();
-            cn.close();   
+              
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }	
 	
-	private static int takeLastTansactionId(){			    
+	private int takeLastTansactionId(){			    
 	    try {
-	    	Connection cn = getConnected(urlDB);
+	    	
 	        Statement stmt;
 	        try {
-	            stmt = cn.createStatement();	            
+	            stmt = conn.createStatement();	            
 	            ResultSet rs = stmt.executeQuery(String.format("SELECT MAX(id) as maxID FROM transactions"));	            
 	            	            
 	            if(rs.next()){
 	            	int id = rs.getInt("maxID");
 	            	rs.close();
-	            	cn.close();
+	            	
 	        		return id;
 	            }
 	            rs.close();
-            	cn.close();	            
-	        } catch (Exception e) {
+            } catch (Exception e) {
 	            System.out.println(e.getMessage());
 	        }	        	               
 	    } catch (Exception e) {
@@ -278,7 +280,7 @@ public class Connector {
 	    return 0;	    
 		
 	}	
-	private static String updateTransactionsSQL(int i){
+	private String updateTransactionsSQL(int i){
 		StringBuilder sb = new StringBuilder();
 		sb.append(SQLstatement.addTransaction);
 		
@@ -289,7 +291,7 @@ public class Connector {
 		return sb.toString();
 	}
 	
-	public static boolean updateTransactions(List<Transaction>transactions) throws ClassNotFoundException {
+	public boolean updateTransactions(List<Transaction>transactions) throws ClassNotFoundException {
 		int trSize = transactions.size();		
 		if(trSize<1) return false;
 				
@@ -298,8 +300,8 @@ public class Connector {
 		int nextTransactionID = takeLastTansactionId()+1;
 	
 		try {			
-			Connection cn = getConnected(urlDB);
-        	PreparedStatement prepst = cn.prepareStatement(stmtSQL); 
+			
+        	PreparedStatement prepst = conn.prepareStatement(stmtSQL); 
         	Transaction firstTr = transactions.get(0);
         	
         	prepst.setInt(position, nextTransactionID);
@@ -321,18 +323,18 @@ public class Connector {
     		}
 
             prepst.executeUpdate();
-            cn.close();   
+             
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
 		return true;		
     }
 	
-	public static List<Transaction> selectTransactions() {
+	public List<Transaction> selectTransactions() {
         try {
-        	Connection cn = getConnected(urlDB);		
+        	
     	    Statement stmt;
-            stmt = cn.createStatement();	  
+            stmt = conn.createStatement();	  
             List<Transaction> transactions = new ArrayList<Transaction>();  
             ResultSet rs = stmt.executeQuery(SQLstatement.selectTransactions);	            
                         
@@ -347,7 +349,7 @@ public class Connector {
             	transactions.add(transaction);
             }
             rs.close(); 
-            cn.close();
+            
         	return transactions;         
             
         } catch (Exception e) {

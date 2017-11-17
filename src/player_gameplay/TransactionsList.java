@@ -40,8 +40,7 @@ public class TransactionsList {
 			transactionsMap.remove(transactionsQueue.remove().getId());
 		}		
 	}	
-	
-	@SuppressWarnings("static-access")
+		
 	public void populateFromDB(){
 			List<Transaction> transactions = DBhelper.getInstance().selectTransactions();
 			for(Transaction tr:transactions){
@@ -49,7 +48,6 @@ public class TransactionsList {
 			}
 	}
 	
-	@SuppressWarnings("static-access")
 	public boolean updateToDB(){
 		try {
 			DBhelper.getInstance().updateTransactions(transactionsToDB);
